@@ -1,137 +1,89 @@
 <?php
-$mysqli = new mysqli("localhost", "miusuario", "password", "mibasededatos");
-/* check connection */
-if (mysqli_connect_errno()) {
-printf("Connect failed: %s\n", mysqli_connect_error());
-exit();
-}
 
-/* Defino mi archivo como XML */ 
-header("Content-Type: text/xml");
+	// Datos de conexión a la Base de Datos
+	$servidor = "localhost";
+	$usuario = "usuario";
+	$password = "password";
+	$db = "basededatos";
 
-/* Inicio la estrucutra de mi archivo XML */
-echo "<?xml version='1.0' encoding='iso-8859-1' ?>" .
-"<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>";
+	// Creo la conexión
+	$conexion = new mysqli($servidor, $usuario, $password, $db);
 
-echo "<url>
-		<loc>http://www.midominio.com</loc>
-		<changefreq>weekly</changefreq>
-		<priority>"."0.8"."</priority>
-	  </url>";
+	// Soporte para caracteres y símbolos extraños
+	$conexion->set_charset("utf8");
 
-echo "<url>
-		<loc>http://www.midominio.com/nosotros.php</loc>
-		<changefreq>weekly</changefreq>
-		<priority>"."0.8"."</priority>
-	  </url>";
+	// Validamos la conexión a la Base de Datos
+	if ($conexion->connect_error) {
+	    die("Erro en la Conexión a la Base de Datos: " . $conexion->connect_error);
+	}
+
+	// Pido el campo 'url' de todos los postres o registros de la tabla 'postres' en la Base de Datos 
+	$sql = "SELECT url FROM postres";
+
+	// Llamo los resultados con los postres o registros
+	$resultados = $conexion->query($sql);
+
+	// Defino mi archivo como XML */ 
+	header("Content-Type: text/xml");
+
+	// Inicio la estrucutra de mi archivo XML */
+	echo "<?xml version='1.0' encoding='iso-8859-1' ?>" .
+	"<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>";	
+
+	// Voy a Imprimir Manualmente 4 URLs que serian la página Principal, Nosotros, Servicios y Contacto 
+
+	// NOTA: En donde dice www.midominio.com debes de colocar el nombre de tu dominio
+
+	echo "<url>
+			<loc>http://www.midominio.com</loc>
+			<changefreq>weekly</changefreq>
+			<priority>"."0.8"."</priority>
+		 </url>";
+
+	echo "<url>
+			<loc>http://www.midominio.com/nosotros.php</loc>
+			<changefreq>weekly</changefreq>
+			<priority>"."0.8"."</priority>
+		  </url>";
 	  
-echo "<url>
-		<loc>http://www.midominio.com/servicios.php</loc>
-		<changefreq>weekly</changefreq>
-		<priority>"."0.8"."</priority>
-	  </url>";
-	  
-echo "<url>
-		<loc>http://www.midominio.com/partners.php</loc>
-		<changefreq>weekly</changefreq>
-		<priority>"."0.8"."</priority>
-	  </url>";
-	  
-echo "<url>
-		<loc>http://www.midominio.com/contactenos.php</loc>
-		<changefreq>weekly</changefreq>
-		<priority>"."0.8"."</priority>
-	  </url>";
+	echo "<url>
+			<loc>http://www.midominio.com/servicios.php</loc>
+			<changefreq>weekly</changefreq>
+			<priority>"."0.8"."</priority>
+		  </url>";
+		  
+	echo "<url>
+			<loc>http://www.midominio.com/contacto.php</loc>
+			<changefreq>weekly</changefreq>
+			<priority>"."0.8"."</priority>
+		  </url>";
 
-/* Establezco la URL para los postres */
-echo "<url>
-		<loc>http://www.midominio.com/postres/peruanos/</loc>
-		<changefreq>weekly</changefreq>
-		<priority>"."0.8"."</priority>
-	  </url>"; 
-
-echo "<url>
-		<loc>http://www.midominio.com./postres/franceses/</loc>
-		<changefreq>weekly</changefreq>
-		<priority>"."0.8"."</priority>
-	  </url>";
-
-echo "<url>
-		<loc>http://www.midominio.com/postres/italianos/</loc>
-		<changefreq>weekly</changefreq>
-		<priority>"."0.8"."</priority>
-	  </url>"; 	  
-
-/* Hago un Multi Query para desde la tabla correspondiente del postre */
-$query  = "SELECT name, 'peruanos' AS tipo FROM postresperuanos;";
-$query .= "SELECT name, 'franceses' AS tipo FROM postresfranceses;";
-$query .= "SELECT name, 'italianos' AS tipo FROM postresitalianos";
-
-/* Ejecuto el multi query */
-if ($mysqli->multi_query($query)) {
-do {
-/* Almaceno el primer resultado */
-if ($result = $mysqli->store_result()) {
- 
-while ($row = $result->fetch_row()) {
-
-/* Defino las url que mostrare en mi archivo sitemap */
-$loc_postresperuanos = "http://www.midominio.com/postres/peruanos/" . $row[0];
-$loc_postresfranceses = "http://www.midominio.com/postres/franceses/" . $row[0];
-$loc_postresitalianos = "http://www.midominio.com/postres/italianos/" . $row[0];
-
-
-/* Imprimo la estructura de cada URL en mi archivo sitemap */
-
-if($row[1]=="peruanos") {
-	echo
-"<url>".
-	"<loc>".xmlentities($loc_postresperuanos)."</loc>".
-	"<changefreq>".weekly."</changefreq>".
-	"<priority>"."0.8"."</priority>
-</url>";
+	// Acá imprimo las URLs de los registros dinámicamente con $row["url"] 
 	
-}
+	// NOTA: El nombre de la carpeta /postres/ la he escrito manualmente, tu puedes colocarle el nombre que desees 
 
-else if ($row[1] == "franceses" ) {
-	echo
-"<url>".
-	"<loc>".xmlentities($loc_postresfranceses)."</loc>" .
-	"<changefreq>".weekly."</changefreq>".
-	"<priority>"."0.8"."</priority>
-</url>";	
-} 
+	if ($resultados->num_rows > 0) {
 
-else if ($row[1] == "italianos" ) { 
-	echo
-"<url>".
-	"<loc>".xmlentities($loc_postresitalianos)."</loc>".
-	"<changefreq>".weekly."</changefreq>".
-	"<priority>"."0.8"."</priority>
-</url>";
+	    while($row = $resultados->fetch_assoc()) {
 
-}
+	    	echo "<url>
+			<loc>http://www.midominio.com/postres/". $row["url"]. "</loc>
+			<changefreq>weekly</changefreq>
+			<priority>"."0.8"."</priority>
+		      </url>";
+	    }
 
-}
- 
-$result->close();
-}
+	} 
 
-if ($mysqli->more_results()) {
-printf("\n");
-}
-} while ($mysqli->next_result());
- 
-}
- 
-echo "</urlset>";
+	// Si no hay registros en la Base de Datos enviamos el siguiente mensaje
+	else {
+	    echo "0 resultados";
+	}
 
-/* Reemplazo caracteres especiales */
-function xmlentities($text) {
-$search = array('&', '<', '>', '"', '\'', ' ');
-$replace = array('&amp;', '&lt;', '&gt;', '&quot;', '&apos;', '-');
-return str_replace($search, $replace, $text);
-}
+	
+ 	// Cierre de la etiqueta del archivo XML del Sitemap
+	echo "</urlset>";
 
-/* Cierro la Conexión a la base de datos */
-$mysqli->close();
+	// Cierro la conexión a la Base de Datos por seguridad 
+	$conexion->close(); 
+	

@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+
+  Options +FollowSymLinks
+  RewriteEngine On
+ 
+  RewriteBase /
+  
+  #le digo a los Buscadores que lean el archivo sitemap.php y lo interprete como si fuera el archivo sitemap.xml
+  
+  RewriteRule ^sitemap\.xml$ sitemap\.php [L]
+
+</IfModule
